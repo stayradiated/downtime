@@ -1,0 +1,14 @@
+{
+  "name": "deadnet",
+  "version": "0.0.1",
+  "description": "Track my internet downtime",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "George Czabania",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.34.0"
+  }
+}
