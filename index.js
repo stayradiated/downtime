@@ -1,18 +1,35 @@
 var request = require('request');
+var fs = require('fs');
 
-var db = [];
+var filename = __dirname + '/db.txt';
 
 var saveResult = function (result) {
-  db.push([Date.now(), result]);
-  console.log(db);
+  var data = Date.now() + ' ' + result + '\n';
+  console.log(data);
+  fs.appendFile(filename, data, function (err) {
+    if (err) throw err;
+  });
 };
 
+var options = {
+  url: 'http://192.168.1.1/connect.html',
+  headers: {
+    Authorization: 'Basic YWRtaW46YWRtaW4='
+  }
+};
+
+var regex = /var pppstatus='(.+)';/;
+
 var fetchStatus = function () {
-  request.get('http://192.168.1.1/connect.html', function () {
+  request.get(options, function (err, res, body) {
+    var status = body.match(regex);
+    if (! status) status = 'Off';
+    else status = status[1];
+    saveResult(status);
   });
 };
 
 (function loop () {
   fetchStatus();
-  setTimeout(loop, 1000);
+  setTimeout(loop, 1000 * 30);
 }());
