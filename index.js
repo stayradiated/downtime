@@ -22,9 +22,9 @@ var regex = /var pppstatus='(.+)';/;
 
 var fetchStatus = function () {
   request.get(options, function (err, res, body) {
-    var status = body.match(regex);
-    if (! status) status = 'Off';
-    else status = status[1];
+    var status;
+    if (err) status = 'Off';
+    else status = body.match(regex)[1];
     saveResult(status);
   });
 };
