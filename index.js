@@ -2,10 +2,16 @@ var request = require('request');
 var fs = require('fs');
 
 var filename = __dirname + '/db.txt';
+var lastStatus = '';
 
 var saveResult = function (result) {
+  if (result === lastStatus) return;
+
   var data = Date.now() + ' ' + result + '\n';
   console.log(data);
+
+  lastStatus = result;
+
   fs.appendFile(filename, data, function (err) {
     if (err) throw err;
   });
@@ -31,5 +37,5 @@ var fetchStatus = function () {
 
 (function loop () {
   fetchStatus();
-  setTimeout(loop, 1000 * 30);
+  setTimeout(loop, 1000 * 10);
 }());
