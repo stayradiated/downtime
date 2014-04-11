@@ -7,7 +7,7 @@ var lastStatus = '';
 var saveResult = function (result) {
   if (result === lastStatus) return;
 
-  var data = Date.now() + ' ' + result + '\n';
+  var data = (new Date()).toString() + ', ' + result + '\n';
   console.log(data);
 
   lastStatus = result;
@@ -20,7 +20,7 @@ var saveResult = function (result) {
 var options = {
   url: 'http://192.168.1.1/connect.html',
   headers: {
-    Authorization: 'Basic YWRtaW46YWRtaW4='
+    Authorization: 'Basic ' + new Buffer('modem_user:uTPkWaKutk8uGLEbk7UBvPVgEUdHnK').toString('base64')
   }
 };
 
@@ -29,8 +29,12 @@ var regex = /var pppstatus='(.+)';/;
 var fetchStatus = function () {
   request.get(options, function (err, res, body) {
     var status;
-    if (err) status = 'Off';
-    else status = body.match(regex)[1];
+    if (err) {
+      status = 'Off';
+    } else {
+      status = body.match(regex);
+      status = status ? status[1] : 'Error';
+    }
     saveResult(status);
   });
 };
