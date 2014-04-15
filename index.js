@@ -7,7 +7,7 @@ var lastStatus = '';
 var saveResult = function (result) {
   if (result === lastStatus) return;
 
-  var data = (new Date()).toString() + ', ' + result + '\n';
+  var data = (new Date()).toString() + ',' + result + '\n';
   console.log(data);
 
   lastStatus = result;
