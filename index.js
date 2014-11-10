@@ -45,17 +45,15 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
   return process.exit(0);
 });
 
-var options = {
-  url: 'http://' + cli.ip + '/connect.html',
-  headers: {
-    Authorization: 'Basic ' + new Buffer(cli.auth).toString('base64')
-  }
-};
-
 var regex = /var pppstatus='(.+)';/;
 
-function storeStatus () {
+function parseStatus () {
   var mod = 0;
+
+  if (state.changed) {
+    storeStatus(mod);
+    return
+  }
 
   switch (state.status) {
     case 'Off':
@@ -78,11 +76,15 @@ function storeStatus () {
 
   var noise = 0.1;
   mod += (Math.random()*noise) - (noise/2);
-  mod = ((state.chart[0]||0) + mod) / 2;
+  mod = ((state.chart[0]||mod) + (state.chart[1]||mod) + (state.chart[2]||mod) + mod) / 4;
 
   if (mod < 0) { mod = 0; }
   else if (mod > 1) { mod = 1; }
 
+  storeStatus(mod);
+}
+
+function storeStatus (mod) {
   state.chart.unshift(mod);
   if (state.chart.length > 500) { // max width
     state.chart.pop();
@@ -106,7 +108,16 @@ function drawChart () {
   screen.render();
 };
 
-function fetchStatus () {
+
+var options = {
+  url: 'http://' + cli.ip + '/connect.html',
+  headers: {
+    Authorization: 'Basic ' + new Buffer(cli.auth).toString('base64')
+  }
+};
+
+function fetchStatusLoop () {
+
   request.get(options, function (err, res, body) {
     var status;
 
@@ -117,17 +128,17 @@ function fetchStatus () {
       status = status ? status[1] : 'Error';
     }
 
+    state.changed = (state.status != status);
     state.status = status;
+
+    setTimeout(fetchStatusLoop, 1000);
   });
 };
 
-(function loop () {
-  fetchStatus();
-  setTimeout(loop, 1000 * 5);
-}());
+fetchStatusLoop();
 
 (function loop () {
-  storeStatus();
+  parseStatus();
   drawChart();
-  setTimeout(loop, 750);
+  setTimeout(loop, 500);
 }());
