@@ -5,7 +5,8 @@ var Canvas  = require('drawille');
 var cli     = require('commander');
 
 cli
-  .option('-a, --auth [authstring]', 'username:password', 'admin:admin')
+  .option('-a, --auth [authstring]', 'The username and password joined with a colon "username:password"', 'admin:admin')
+  .option('-i, --ip [ip]', 'The IP address of the modem', '192.168.1.1')
   .version(require('./package').version)
   .parse(process.argv);
 
@@ -45,7 +46,7 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 var options = {
-  url: 'http://192.168.1.1/connect.html',
+  url: 'http://' + cli.ip + '/connect.html',
   headers: {
     Authorization: 'Basic ' + new Buffer(cli.auth).toString('base64')
   }
