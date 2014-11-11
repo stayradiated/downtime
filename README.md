@@ -2,7 +2,7 @@
 
 > It's just ping, but with a graph
 
-![Screenshot](screenshot.jpg)
+![Screenshot](screenshot.png)
 
 `downtime -ip 8.8.8.8`
 
