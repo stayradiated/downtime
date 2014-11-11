@@ -80,24 +80,17 @@ function drawChart () {
   screen.render();
 };
 
-(function loop () {
-  storeStatus(state.status);
-  drawChart();
-  setTimeout(loop, 500);
-}());
-
 var ping = child.spawn('ping', ['-s', cli.size, cli.ip]);
 
 ping.stdout.pipe(split()).on('data', function (buffer) {
   var line = buffer.toString();
   var match = line.match(/time=(\d+\.\d+)/i);
-  if (match) {
-    state.status = parseInt(match[1]);
-  } else {
-    state.status = 2;
-  }
+  var status = match ? parseInt(match[1], 10) : 2;
+  storeStatus(status);
+  drawChart();
 });
 
 ping.stderr.on('data', function (buffer) {
-  state.status = 1;
+  storeStatus(1);
+  drawChart();
 });
