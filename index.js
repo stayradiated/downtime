@@ -1,17 +1,17 @@
-var fs      = require('fs');
-var request = require('request');
+var child   = require('child_process');
+var split   = require('split');
 var blessed = require('blessed');
 var Canvas  = require('drawille');
 var cli     = require('commander');
 
 cli
-  .option('-a, --auth [authstring]', 'The username and password joined with a colon "username:password"', 'admin:admin')
-  .option('-i, --ip [ip]', 'The IP address of the modem', '192.168.1.1')
+  .option('-i, --ip [ip]', 'The IP address to ping', '8.8.8.8')
+  .option('-s, --size [packetsize]', 'Size of packets to send', '16')
   .version(require('./package').version)
   .parse(process.argv);
 
 var state = {
-  status: 'Off',
+  status: 0,
   chart: [],
 };
 
@@ -45,47 +45,8 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
   return process.exit(0);
 });
 
-var regex = /var pppstatus='(.+)';/;
-
-function parseStatus () {
-  var mod = 0;
-
-  if (state.changed) {
-    storeStatus(mod);
-    return
-  }
-
-  switch (state.status) {
-    case 'Off':
-      mod = 0;
-      break;
-    case 'Error':
-    case 'Authentication Failure':
-      mod = 0.2;
-      break;
-    case 'PPP Down':
-      mod = 0.4;
-      break;
-    case 'ADSL Link Down':
-      mod = 0.6;
-      break;
-    case 'Up':
-      mod = 1;
-      break;
-  }
-
-  var noise = 0.1;
-  mod += (Math.random()*noise) - (noise/2);
-  mod = ((state.chart[0]||mod) + (state.chart[1]||mod) + (state.chart[2]||mod) + mod) / 4;
-
-  if (mod < 0) { mod = 0; }
-  else if (mod > 1) { mod = 1; }
-
-  storeStatus(mod);
-}
-
-function storeStatus (mod) {
-  state.chart.unshift(mod);
+function storeStatus (value) {
+  state.chart.unshift(value);
   if (state.chart.length > 500) { // max width
     state.chart.pop();
   }
@@ -96,10 +57,21 @@ function drawChart () {
   var height = (graph.height - 2) * 4;
   var canvas = new Canvas(width, height);
 
-  for (var x = 0, len = state.chart.length; x < len; x++) {
-    var mod = state.chart[x];
+  var len = state.chart.length;
+  var max = 0;
 
-    for (var y = 0; y < height * mod; y++) {
+  for (var i = 0; i < len; i++) {
+    if (state.chart[i] > max) {
+      max = state.chart[i];
+    }
+  }
+
+  max += 10;
+
+  for (var x = 0; x < len; x++) {
+    var value = state.chart[x] / max * height;
+
+    for (var y = 0; y < value; y++) {
       canvas.set(width - x, height - y);
     }
   }
@@ -108,37 +80,24 @@ function drawChart () {
   screen.render();
 };
 
-
-var options = {
-  url: 'http://' + cli.ip + '/connect.html',
-  headers: {
-    Authorization: 'Basic ' + new Buffer(cli.auth).toString('base64')
-  }
-};
-
-function fetchStatusLoop () {
-
-  request.get(options, function (err, res, body) {
-    var status;
-
-    if (err) {
-      status = 'Off';
-    } else {
-      status = body.match(regex);
-      status = status ? status[1] : 'Error';
-    }
-
-    state.changed = (state.status != status);
-    state.status = status;
-
-    setTimeout(fetchStatusLoop, 1000);
-  });
-};
-
-fetchStatusLoop();
-
 (function loop () {
-  parseStatus();
+  storeStatus(state.status);
   drawChart();
   setTimeout(loop, 500);
 }());
+
+var ping = child.spawn('ping', ['-s', cli.size, cli.ip]);
+
+ping.stdout.pipe(split()).on('data', function (buffer) {
+  var line = buffer.toString();
+  var match = line.match(/time=(\d+\.\d+)/i);
+  if (match) {
+    state.status = parseInt(match[1]);
+  } else {
+    state.status = 2;
+  }
+});
+
+ping.stderr.on('data', function (buffer) {
+  state.status = 1;
+});

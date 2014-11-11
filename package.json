@@ -1,7 +1,7 @@
 {
   "name": "downtime",
   "version": "1.0.0",
-  "description": "Monitor stupid internet connection",
+  "description": "It's ping, but with a graph...",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,12 +9,16 @@
   "bin": {
     "downtime": "./bin/downtime.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stayradiated/downtime.git"
+  },
   "author": "George Czabania",
   "license": "MIT",
   "dependencies": {
     "blessed": "0.0.37",
     "commander": "^2.5.0",
     "drawille": "^1.0.0",
-    "request": "^2.47.0"
+    "split": "^0.3.1"
   }
 }

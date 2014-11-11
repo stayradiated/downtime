@@ -1,9 +1,9 @@
 # Downtime
 
-> Because my internet connection is terrible.
+> It's just ping, but with a graph
 
 ![Screenshot](screenshot.jpg)
 
-`downtime -a 'admin:admin'`
+`downtime -ip 8.8.8.8`
 
 Press `q` to quit.
