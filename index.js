@@ -76,12 +76,13 @@ function drawChart () {
     }
   }
 
+  graph.style.fg = lastStatus === 1 ? '#fff' : '#f43059';
   graph.setContent(canvas.frame());
   screen.render();
 };
 
 var ping = child.spawn('ping', ['-s', cli.size, cli.ip]);
-var lastStatus = 0.5;
+var lastStatus = 1;
 
 ping.stdout.pipe(split()).on('data', function (buffer) {
   var line = buffer.toString();
@@ -102,6 +103,6 @@ ping.stderr.on('data', function (buffer) {
 
 function reset () {
   clearTimeout(_reset);
-  _reset = setTimeout(function () { lastStatus = 0.5; }, 1000);
+  _reset = setTimeout(function () { lastStatus = 1; }, 1000);
 }
 var _reset = setTimeout(reset, 0);
