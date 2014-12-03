@@ -76,23 +76,24 @@ function drawChart () {
     }
   }
 
-  graph.style.fg = lastStatus === 1 ? '#fff' : '#f43059';
+  graph.style.fg = lastStatus === ERROR_STATUS ? '#fff' : '#f43059';
   graph.setContent(canvas.frame());
   screen.render();
 };
 
 var ping = child.spawn('ping', ['-s', cli.size, cli.ip]);
-var lastStatus = 1;
+var ERROR_STATUS = 1;
+var lastStatus = ERROR_STATUS;
 
 ping.stdout.pipe(split()).on('data', function (buffer) {
   var line = buffer.toString();
   var match = line.match(/time=(\d+\.\d+)/i);
-  lastStatus = match ? parseInt(match[1], 10) : 2;
+  lastStatus = match ? parseInt(match[1], 10) : ERROR_STATUS;
   reset();
 });
 
 ping.stderr.on('data', function (buffer) {
-  lastStatus = 1;
+  lastStatus = ERROR_STATUS;
 });
 
 (function loop () {
@@ -103,6 +104,6 @@ ping.stderr.on('data', function (buffer) {
 
 function reset () {
   clearTimeout(_reset);
-  _reset = setTimeout(function () { lastStatus = 1; }, 1000);
+  _reset = setTimeout(function () { lastStatus = ERROR_STATUS; }, 1000);
 }
 var _reset = setTimeout(reset, 0);
