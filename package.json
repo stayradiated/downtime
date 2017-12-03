@@ -1,5 +1,5 @@
 {
-  "name": "downtime",
+  "name": "@stayradiated/downtime",
   "version": "1.0.0",
   "description": "It's ping, but with a graph...",
   "main": "index.js",
