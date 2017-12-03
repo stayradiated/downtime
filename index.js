@@ -3,6 +3,7 @@ var split   = require('split');
 var blessed = require('blessed');
 var Canvas  = require('drawille');
 var cli     = require('commander');
+var isWindows = require('is-windows');
 
 cli
   .option('-i, --ip [ip]', 'The IP address to ping', '8.8.8.8')
@@ -81,7 +82,12 @@ function drawChart () {
   screen.render();
 };
 
-var ping = child.spawn('ping', ['-s', cli.size, cli.ip]);
+var ping
+if (isWindows()) {
+  ping = child.spawn('ping', ['-t', '-l', cli.size, cli.ip])
+} else {
+  ping = child.spawn('ping', ['-s', cli.size, cli.ip]);
+}
 var ERROR_STATUS = 1;
 var lastStatus = ERROR_STATUS;
 

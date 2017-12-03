@@ -19,6 +19,7 @@
     "blessed": "0.0.37",
     "commander": "^2.5.0",
     "drawille": "^1.0.0",
+    "is-windows": "^1.0.1",
     "split": "^0.3.1"
   }
 }
