@@ -93,7 +93,7 @@ var lastStatus = ERROR_STATUS;
 
 ping.stdout.pipe(split()).on('data', function (buffer) {
   var line = buffer.toString();
-  var match = line.match(/time=(\d+\.\d+)/i);
+  var match = line.match(/time=([\d\.]+)/i);
   lastStatus = match ? parseInt(match[1], 10) : ERROR_STATUS;
   reset();
 });
